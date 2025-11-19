@@ -1,4 +1,4 @@
-package main.java.com.estoque.repository;
+package com.estoque.repository;
 
 public class CategoriaRepository {
   

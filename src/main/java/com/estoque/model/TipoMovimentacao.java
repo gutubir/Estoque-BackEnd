@@ -1,5 +1,6 @@
-package main.java.com.estoque.model;
+package com.estoque.model;
 
-public class TipoMovimentacao {
-  
+public enum TipoMovimentacao {
+    ENTRADA,
+    SAIDA
 }

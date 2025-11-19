@@ -1,4 +1,4 @@
-package main.java.com.estoque.service;
+package com.estoque.service;
 
 public class CategoriaService {
   

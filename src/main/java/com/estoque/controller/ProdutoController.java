@@ -1,4 +1,4 @@
-package main.java.com.estoque.controller;
+package com.estoque.controller;
 
 public class ProdutoController {
   

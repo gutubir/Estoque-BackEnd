@@ -7,7 +7,7 @@ public class Produto {
     private Long id;
     private String nome;
     private BigDecimal precoUnitario;
-    private String unidade; //ex: KG, UN, L
+    private String unidade; 
     private int quantidadeEstoque;
     private int quantidadeMinima;
     private int quantidadeMaxima;

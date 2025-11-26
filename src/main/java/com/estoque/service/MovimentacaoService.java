@@ -1,56 +1,76 @@
 package com.estoque.service;
 
-import main.java.com.estoque.model.Movimentacao;
-import main.java.com.estoque.model.Produto;
-import main.java.com.estoque.model.TipoMovimentacao;
-import main.java.com.estoque.repository.MovimentacaoRepository;
-import main.java.com.estoque.repository.ProdutoRepository;
-import java.util.List;
+import com.estoque.model.Movimentacao;
+import com.estoque.model.Produto;
+import com.estoque.model.TipoMovimentacao;
+import com.estoque.repository.MovimentacaoRepository;
+import com.estoque.repository.ProdutoRepository;
 
+import java.time.LocalDate;
+import java.util.List;
 
 public class MovimentacaoService {
 
-    private final MovimentacaoRepository movRepository;
+    private final MovimentacaoRepository movimentacaoRepository;
     private final ProdutoRepository produtoRepository;
 
-    public MovimentacaoService(MovimentacaoRepository movRepository,
+    public MovimentacaoService(MovimentacaoRepository movimentacaoRepository,
                                ProdutoRepository produtoRepository) {
-        this.movRepository = movRepository;
+        this.movimentacaoRepository = movimentacaoRepository;
         this.produtoRepository = produtoRepository;
     }
 
-    public Movimentacao registrarMovimentacao(Movimentacao movimentacao) {
-        Produto produto = movimentacao.getProduto();
-
-        int qtdAtual = produto.getQuantidadeEstoque();
-        int qtdMov = movimentacao.getQuantidadeMovimentada();
-
-        if (movimentacao.getTipoMovimentacao() == TipoMovimentacao.ENTRADA) {
-            produto.setQuantidadeEstoque(qtdAtual + qtdMov);
-        } else {
-            produto.setQuantidadeEstoque(qtdAtual - qtdMov);
+    /**
+     * Registra uma nova movimentação e atualiza o estoque do produto
+     */
+    public Movimentacao registrarMovimentacao(Long produtoId, 
+                                             TipoMovimentacao tipo, 
+                                             int quantidade,
+                                             LocalDate data) {
+        // Buscar produto
+        Produto produto = produtoRepository.buscarPorId(produtoId);
+        if (produto == null) {
+            throw new RuntimeException("Produto não encontrado: " + produtoId);
         }
 
+        // Criar movimentação
+        Movimentacao movimentacao = new Movimentacao();
+        movimentacao.setProduto(produto);
+        movimentacao.setTipoMovimentacao(tipo);
+        movimentacao.setQuantidadeMovimentada(quantidade);
+        movimentacao.setDataMovimentacao(data);
+
+        // Atualizar estoque do produto
+        int novoEstoque = produto.getQuantidadeEstoque();
+        
+        if (tipo == TipoMovimentacao.ENTRADA) {
+            novoEstoque += quantidade;
+        } else if (tipo == TipoMovimentacao.SAIDA) {
+            novoEstoque -= quantidade;
+            if (novoEstoque < 0) {
+                throw new RuntimeException("Estoque insuficiente para a operação");
+            }
+        }
+        
+        produto.setQuantidadeEstoque(novoEstoque);
         produtoRepository.salvar(produto);
-        Movimentacao salva = movRepository.salvar(movimentacao);
 
-        verificarLimites(produto);
-
-        return salva;
+        // Salvar movimentação
+        return movimentacaoRepository.salvar(movimentacao);
     }
 
-    private void verificarLimites(Produto produto) {
-        if (produto.getQuantidadeEstoque() < produto.getQuantidadeMinima()) {
-            // aqui você pode lançar exceção, logar ou retornar algum aviso
-            System.out.println("ATENÇÃO: produto abaixo da quantidade mínima: " + produto.getNome());
-        }
-
-        if (produto.getQuantidadeEstoque() > produto.getQuantidadeMaxima()) {
-            System.out.println("ATENÇÃO: produto acima da quantidade máxima: " + produto.getNome());
-        }
-    }
-
+    /**
+     * Lista todas as movimentações
+     */
     public List<Movimentacao> listarMovimentacoes() {
-        return movRepository.buscarTodos();
+        return movimentacaoRepository.buscarTodos();
+    }
+
+    /**
+     * Busca movimentações por produto
+     */
+    public List<Movimentacao> buscarPorProduto(Long produtoId) {
+        // TODO: implementar se necessário
+        throw new UnsupportedOperationException("Método ainda não implementado");
     }
 }

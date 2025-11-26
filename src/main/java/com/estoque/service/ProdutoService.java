@@ -1,7 +1,7 @@
 package com.estoque.service;
 
-import main.java.com.estoque.model.Produto;
-import main.java.com.estoque.repository.ProdutoRepository;
+import com.estoque.model.Produto;
+import com.estoque.repository.ProdutoRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,7 +31,7 @@ public class ProdutoService {
         return produtoRepository.buscarTodos();
     }
 
-    // Reajuste de preço de todos os produtos em um percentual
+    //Reajusta o preço de todos os produtos em um percentual
     public void reajustarPrecos(BigDecimal percentual) {
         for (Produto p : produtoRepository.buscarTodos()) {
             BigDecimal novoPreco = p.getPrecoUnitario()
@@ -40,4 +40,5 @@ public class ProdutoService {
             produtoRepository.salvar(p);
         }
     }
+
 }

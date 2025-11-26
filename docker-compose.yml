@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: estoque_db
+    restart: always
+    environment:
+      POSTGRES_DB: estoque
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"   # PostgreSQL roda na 5432, não 5000
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - estoque-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: estoque_app
+    restart: on-failure
+    ports:
+      - "5000:5000"   # Backend Java escuta na 5000
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/estoque
+      DB_USER: admin
+      DB_PASSWORD: admin123
+    depends_on:
+      - db
+    networks:
+      - estoque-network
+
+volumes:
+  postgres_data:
+
+networks:
+  estoque-network:
+    driver: bridge
